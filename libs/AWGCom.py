@@ -20,12 +20,12 @@ def test():
 
     t=np.arange(0,2*math.pi,0.01)
     s= np.sin(t)
-#    print s
+    #    print s
     print len(s)
     awg.setRunMode("SEQuence")
     awg.createSequence(SequenceLength=1)
 
-#    awg.sendMessage("*RST")
+    #    awg.sendMessage("*RST")
     awg.deleteWaveforms('test1')
     awg.newWaveform('test1',len(s))
     awg.transmitWaveformData('test1',s,marker1=np.ones(len(s)))
@@ -37,12 +37,12 @@ def test():
     awg.transmitWaveformData('test2',second)
     awg.setChannelWaveform(2,'test2',1)
     awg.newWaveform('C1_DATA_1',200000)
-#    awg.sendMessage('*OPC?')
-#    print awg.readMessage()
+    #    awg.sendMessage('*OPC?')
+    #    print awg.readMessage()
 
-#    pylab.plot(t,s)
-#    pylab.show()
-#    awg.deleteWaveforms(names)
+    #    pylab.plot(t,s)
+    #    pylab.show()
+    #    awg.deleteWaveforms(names)
     awg.closeCom
 
 
@@ -59,7 +59,7 @@ class AWGCom(SocketCom):
     def __init__(self, Ip, Port):
         super(AWGCom,self).__init__(Ip,Port,Delimiter=';:', EndOfMessage='\n')
 
-    def newWaveform(self,name,size,stringOnly=0):
+    def newWaveform(self, name, size, stringOnly=0):
         """
         Creates a new Waveform slot without data in it
         """
@@ -69,7 +69,7 @@ class AWGCom(SocketCom):
         else:
             return msg
 
-    def transmitWaveformData(self,name,data,stringOnly=0,marker1=[],marker2=[]):
+    def transmitWaveformData(self, name, data, stringOnly=0, marker1=[], marker2=[]):
         """
         Writes the Data given into the Waveformslot 'name' created by the function newWaveform
         """
@@ -84,7 +84,7 @@ class AWGCom(SocketCom):
             marker2=np.zeros(len(data),dtype=int)
         else:
             marker2=marker2*MARKER2
-#        self.newWaveform(name,len(data))
+        # self.newWaveform(name,len(data))
         block_data=''
         msgStart=('WLISt:WAVeform:DATA "'+name+'",0,'+str(len(data))+',#'+str(len(str(5*len(data))))+str(5*len(data)))
         for val,m1,m2 in itertools.izip(data,marker1,marker2):
@@ -97,7 +97,6 @@ class AWGCom(SocketCom):
             self.sendMessage(msg)
         else:
             return msg
-
 
     def readWaveformNames(self):
         """
@@ -116,7 +115,7 @@ class AWGCom(SocketCom):
             strippednames.append(name.rstrip('"').lstrip('"'))
         return strippednames
 
-    def deleteWaveforms(self,Names):
+    def deleteWaveforms(self, Names):
         """
         Deletes a list of Waveforms given to the function as strings
         The names are without the enclosing "s and is compliant with the format returned by the function readWaveformNames.
@@ -134,7 +133,7 @@ class AWGCom(SocketCom):
                 print 'TypeError occourred on Waveform Names in function deleteWaveforms, please ensure that message is a string or a list of strings'
         self.sendMessage(dlmsg)
 
-    def changeChannelDelay(self,Channel,Delay,stringOnly=0):
+    def changeChannelDelay(self, Channel, Delay, stringOnly=0):
         """
         Changes the delay of the Channel to 'Delay' picoseconds
         """
@@ -144,7 +143,7 @@ class AWGCom(SocketCom):
         else:
             return msg
 
-    def changeChannelPhase(self,Channel,Phase,stringOnly=0):
+    def changeChannelPhase(self, Channel, Phase, stringOnly=0):
         """
         Changes the phase of the Channel to Phase in Degrees
         """
@@ -154,7 +153,7 @@ class AWGCom(SocketCom):
         else:
             return msg
 
-    def changeChannelAmplitude(self,Channel,Amplitude,stringOnly=0):
+    def changeChannelAmplitude(self, Channel, Amplitude, stringOnly=0):
         msg='SOURCE'+str(Channel)+':VOLTAGE:AMPLITUDE '+str(Amplitude)
 
         if stringOnly==0:
@@ -162,8 +161,7 @@ class AWGCom(SocketCom):
         else:
             return msg
 
-
-    def changeChannelOffset(self,Channel,Offset,stringOnly=0):
+    def changeChannelOffset(self, Channel, Offset, stringOnly=0):
         msg='SOURCE'+str(Channel)+':VOLTAGE:OFFSET '+str(Offset)
 
         if stringOnly==0:
@@ -171,18 +169,18 @@ class AWGCom(SocketCom):
         else:
             return msg
 
-    def setChannelWaveformSequence(self,Channel,WaveformName,SequenceIndex=1):
+    def setChannelWaveformSequence(self, Channel, WaveformName, SequenceIndex=1):
         """
         Puts Waveform 'WaveformName' into Channel 'Channel'.
 
         If the RunMode is SEQuence, it will use the optional Argument 'SequenceIndex' to determine the element in the sequence.
         """
-#SEQuence:ELEMent1:WAVeform1 "waveseq1_channel1";
+        #SEQuence:ELEMent1:WAVeform1 "waveseq1_channel1";
 
 
         self.sendMessage('SEQuence:ELEMent'+str(SequenceIndex)+':WAVeform'+str(Channel)+' "'+WaveformName+'"')
 
-    def setChannelWaveform(self,Channel,WaveformName):
+    def setChannelWaveform(self, Channel, WaveformName):
         """
         Puts Waveform 'WaveformName' into Channel 'Channel'.
 
@@ -194,28 +192,172 @@ class AWGCom(SocketCom):
         self.sendMessage("AWGControl:RMODe?")
         return self.readMessage()
 
-    def setRunMode(self,RunMode): #TODO implement stringonly
+    def setRunMode(self, RunMode, stringOnly=0):
         """
         Sets the runmode of the machine
         RunModes are : CONTinuous, TRIGgered, GATed, SEQuence, ENHanced
         use CONT for normal operation and SEQuence for sequence operation
         """
-        self.sendMessage("AWGControl:RMODe "+RunMode)
+        msg = "AWGControl:RMODe "+RunMode
 
-    def createSequence(self, SequenceLength):#TODO implement stringonly
+        if stringOnly==0:
+            self.sendMessage(msg)
+        else:
+            return msg
+
+    def setChannelOutput(self, Channel, Output, stringOnly=0):
+        """
+        Sets the output of the channel
+        """
+        if Output:
+            msg = "OUTPut"+str(Channel)+":STATe ON"
+        else:
+            msg = "OUTPut"+str(Channel)+":STATe OFF"
+
+        if stringOnly==0:
+            self.sendMessage(msg)
+        else:
+            return msg
+
+    def setOutput(self, Output, stringOnly=0):
+        """
+        Sets all the outputs
+        """
+        self.setChannelOutput(1, Output, stringOnly)
+        self.setChannelOutput(2, Output, stringOnly)
+        self.setChannelOutput(3, Output, stringOnly)
+        self.setChannelOutput(4, Output, stringOnly)
+
+    def setOutputFilterChannel(self, Channel, filt, stringOnly=0):
+        """
+        Sets the filter of the channel output
+        """
+        msg = ''
+        if filt == 'Through' or filt == 'INF':
+            msg = "OUTPut"+str(Channel)+":FILTer:LPASs:FREQuency INF"
+
+        if stringOnly==0:
+            self.sendMessage(msg)
+        else:
+            return msg
+
+    def setSourceMarkerDelay(self, Channel, Marker, Delay, stringOnly=0):
+        """
+        Sets the Delay of the Marker
+        """
+        msg = "SOURce"+str(Channel)+":MARKer"+str(Marker)+":DELay "+str(Delay)
+
+        if stringOnly==0:
+            self.sendMessage(msg)
+        else:
+            return msg
+
+    def setDirectOutput(self,Channel, State, stringOnly=0):
+        """
+        This command enables the raw DAC waveform outputs for the specified channel.
+        """
+        if State:
+            msg = "AWGControl:DOUTput"+str(Channel)+":STATe ON"
+        else:
+            msg = "AWGControl:DOUTput"+str(Channel)+":STATe OFF"
+
+        if stringOnly==0:
+            self.sendMessage(msg)
+        else:
+            return msg
+
+    def setAddInput(self,Channel, State, stringOnly=0):
+        """
+        This command adds the signal from an external input to the output of the channel.
+        """
+        if State:
+            msg = "SOURce"+str(Channel)+':COMBine:FEED "ESIGnal"'
+        else:
+            msg = "SOURce"+str(Channel)+':COMBine:FEED ""'
+
+        if stringOnly==0:
+            self.sendMessage(msg)
+        else:
+            return msg
+
+    def setSourceMarkerVoltageHigh(self, Channel, Marker, VoltageHigh, stringOnly=0):
+        """
+        Sets the VoltageHigh of the Marker
+        """
+        msg = "SOURce"+str(Channel)+":MARKer"+str(Marker)+":VOLTage:HIGH "+str(VoltageHigh)
+
+        if stringOnly==0:
+            self.sendMessage(msg)
+        else:
+            return msg
+
+    def setSourceMarkerVoltageLow(self, Channel, Marker, VoltageLow, stringOnly=0):
+        """
+        Sets the VoltageLow of the Marker
+        """
+        msg = "SOURce"+str(Channel)+":MARKer"+str(Marker)+":VOLTage:LOW "+str(VoltageLow)
+
+        if stringOnly==0:
+            self.sendMessage(msg)
+        else:
+            return msg
+
+    def setSamplingRate(self, Rate, stringOnly=0):
+        """
+        This command and query sets or returns the sampling frequency of the arbitrary
+        waveform generator. Sampling frequency can be set when the internal clock
+        source is selected and one of the following conditions is met:
+        """
+        msg = "SOURce1:FREQuency "+str(Rate)
+
+        if stringOnly==0:
+            self.sendMessage(msg)
+        else:
+            return msg
+
+    def setClockSource(self, Source, stringOnly=0):
+        """
+        This command and query sets or returns the clock source. When the clock source
+        is internal, the arbitrary waveform generator's internal clock is used to generate
+        the clock signal. If the clock source is external, the clock signal from an external
+        oscillator is used.
+        """
+        if Source == 'Internal':
+            msg = "AWGControl:CLOCk:SOURCe INTernal"
+        else:
+            msg = "AWGControl:CLOCk:SOURCe EXTernal"
+
+        if stringOnly==0:
+            self.sendMessage(msg)
+        else:
+            return msg
+
+
+    def createSequence(self, SequenceLength):
         """
         This has to be called to initialize a sequence
         """
-        self.sendMessage('SEQuence:LENGth '+str(SequenceLength))
+        msg = 'SEQuence:LENGth '+ str(SequenceLength)
 
-    def setSeqElementGoto(self,SequenceIndex=1,State=1,Index=1):#TODO implement stringonly
+        if stringOnly==0:
+            self.sendMessage(msg)
+        else:
+            return msg
+
+    def setSeqElementGoto(self, SequenceIndex=1, State=1, Index=1):
         """
         Used to set JumpMode for a sequence Element
         States are : 0(OFF) , 1(ON)
         """
-        self.sendMessage("SEQuence:ELEMent"+str(SequenceIndex)+":GOTO:STATe "+str(State))
-        if (State==1):
-            self.sendMessage("SEQuence:ELEMent"+str(SequenceIndex)+":GOTO:INDex "+str(Index))
+        msg1 = "SEQuence:ELEMent"+str(SequenceIndex)+":GOTO:STATe "+str(State)
+        msg2 = "SEQuence:ELEMent"+str(SequenceIndex)+":GOTO:INDex "+str(Index)
+
+        if stringOnly==0:
+            self.sendMessage(msg1)
+            if (State==1):
+                self.sendMessage(msg2)
+        else:
+            return msg1, msg2
 
     def setSeqElementJump(self,SequenceIndex,Type='INDex',Index=1):#TODO implement stringonly
         """
