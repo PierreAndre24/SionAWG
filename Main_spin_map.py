@@ -65,8 +65,12 @@ def OneGateSpinMap(
 
 if __name__ == '__main__':
     sion = SionAWG('192.168.1.117', 4000)
+<<<<<<< Updated upstream
     spinmap = OneGateSpinMap()
     sion.openCom()
     sion.DeleteAllWaveforms()
     sion.SendSequenceLight(sequence = spinmap)
     sion.closeCom()
+=======
+    OneGateSpinMap()
+>>>>>>> Stashed changes
