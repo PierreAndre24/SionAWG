@@ -51,7 +51,7 @@ class SionAWG(AWGCom):
         self.openCom()
         print self.readWaveformNames()
 
-        t=np.arange(0,2*math.pi,0.01)
+        t=np.arange(0,2*np.pi,0.01)
         s= np.sin(t)
         #    print s
         print len(s)
