@@ -51,30 +51,40 @@ class SionAWG(AWGCom):
         self.openCom()
         print self.readWaveformNames()
 
-        t=np.arange(0,2*np.pi,0.01)
-        s= np.sin(t)
-        #    print s
-        print len(s)
+
         self.setRunMode("SEQuence")
         self.createSequence(SequenceLength=1)
 
         #    awg.sendMessage("*RST")
+        t=np.arange(0,2*np.pi,0.01)
+        first = np.sin(t)
         self.deleteWaveforms('test1')
-        self.newWaveform('test1',len(s))
-        self.transmitWaveformData('test1',s,marker1=np.ones(len(s)))
-        self.setChannelWaveform(Channel=1,WaveformName='test1',SequenceIndex=1)
+        self.newWaveform('test1', len(first))
+        self.transmitWaveformData('test1', first, marker1=np.ones(len(first)))
+        self.setChannelWaveformSequence(Channel=1, WaveformName='test1', SequenceIndex=1)
 
-        second =np.arange(0,1,0.002)
+        second = np.arange(0,1,0.002)
         self.deleteWaveforms(['test2'])
         self.newWaveform('test2',len(second))
         self.transmitWaveformData('test2',second)
-        self.setChannelWaveform(2,'test2',1)
-        self.newWaveform('C1_DATA_1',200000)
+        self.setChannelWaveformSequence(Channel=2,WaveformName='test2',SequenceIndex=1)
+
+        t=np.arange(0,10*np.pi,0.01)
+        third = np.sin(t)
+        self.deleteWaveforms('test3')
+        self.newWaveform('test3', len(third))
+        self.transmitWaveformData('test3', third, marker1=np.ones(len(third)))
+        self.setChannelWaveformSequence(Channel=3, WaveformName='test3', SequenceIndex=1)
+
+        fourth = np.arange(0,-0.5,-0.002)
+        self.deleteWaveforms(['test4'])
+        self.newWaveform('test4',len(fourth))
+        self.transmitWaveformData('test4',fourth)
+        self.setChannelWaveformSequence(Channel=4,WaveformName='test4',SequenceIndex=1)
+
+
         #    awg.sendMessage('*OPC?')
         #    print awg.readMessage()
-
-        #    pylab.plot(t,s)
-        #    pylab.show()
         #    awg.deleteWaveforms(names)
         self.closeCom()
 
