@@ -332,6 +332,134 @@ class AWGCom(SocketCom):
         else:
             return msg
 
+    def setTriggerSource(self, Source, stringOnly=0):
+        """
+        This command and query sets or returns the trigger source
+        """
+        if Source == 'Internal':
+            msg = "TRIGger:SEQuence:SOURCe INTernal"
+        else:
+            msg = "TRIGger:SEQuence:SOURCe EXernal"
+
+        if stringOnly==0:
+            self.sendMessage(msg)
+        else:
+            return msg
+
+    def setTriggerLevel(self, Level, stringOnly=0):
+        """
+        This command and query sets or returns the trigger input level (threshold).
+        """
+
+        msg = "TRIGger:SEQuence:LEVel " + str(Level)
+
+        if stringOnly==0:
+            self.sendMessage(msg)
+        else:
+            return msg
+
+    def setTriggerSlope(self, Slope, stringOnly=0):
+        """
+        This command and query sets or returns the trigger slope. It is used to set polarity in modes other than gated mode.
+        """
+
+        if Slope == 'Positive'
+            msg = "TRIGger:SEQuence:SLOPe POSitive"
+        else:
+            msg = "TRIGger:SEQuence:SLOPe NEGative"
+
+        if stringOnly==0:
+            self.sendMessage(msg)
+        else:
+            return msg
+
+    def setTriggerImpedance(self, Impedance, stringOnly=0):
+        """
+        This command and query sets or returns the trigger impedance. It applies only
+        to the external trigger.
+        """
+
+        if Impedance == '1k'
+            msg = "TRIGger:SEQuence:IMPedance 1000"
+        else:
+            msg = "TRIGger:SEQuence:IMPedance 50"
+
+        if stringOnly==0:
+            self.sendMessage(msg)
+        else:
+            return msg
+
+    def setEventLevel(self, Level, stringOnly=0):
+        """
+        This command and query sets or returns the event level.
+        """
+
+        msg = "EVENt:LEVel " + str(Level)
+
+        if stringOnly==0:
+            self.sendMessage(msg)
+        else:
+            return msg
+
+    def setEventImpedance(self, Impedance, stringOnly=0):
+        """
+        This command and query sets or returns the impedance of the external event input. Valid values are 50 ohm or 1 kohm.
+        """
+
+        if Impedance == '1k'
+            msg = "EVENt:IMPedance 1000"
+        else:
+            msg = "EVENt:IMPedance 50"
+
+        if stringOnly==0:
+            self.sendMessage(msg)
+        else:
+            return msg
+
+    def setEventJumpTiming(self, JTiming, stringOnly=0):
+        """
+        This command and query sets or returns the jump timing. Refer to the User Online Help for more information on jump timing.
+        """
+
+        if Impedance == 'Async'
+            msg = "EVENt:JTIMing ASYNchronous"
+        else:
+            msg = "EVENt:JTIMing SYNChronous"
+
+        if stringOnly==0:
+            self.sendMessage(msg)
+        else:
+            return msg
+
+    def setEventPolarity(self, JTiming, stringOnly=0):
+        """
+        This command and query sets or returns the polarity of event signal. The Event Jump is the function to change the sequencing of the waveform by an event signal.
+        """
+
+        if Impedance == 'Positive'
+            msg = "EVENt:POLarity POSitive"
+        else:
+            msg = "EVENt:POLarity NEGative"
+
+        if stringOnly==0:
+            self.sendMessage(msg)
+        else:
+            return msg
+
+    def setDCOutputLevel(self, Channel, Level):
+        """
+        This command and query sets or returns the DC output level.
+        The value of n = 1|2|3|4.
+        <offset>::=<NR3> the value will be between –3.0 V to +5.0 V.
+        At *RST, this returns 0 V.
+        """
+
+        msg = "AWGControl:DC" + str(Channel) + ":VOLTage:OFFSet " + str(Level)
+
+        if stringOnly==0:
+            self.sendMessage(msg)
+        else:
+            return msg
 
     def createSequence(self, SequenceLength):
         """

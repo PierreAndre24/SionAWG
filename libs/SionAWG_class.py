@@ -48,7 +48,35 @@ class SionAWG(AWGCom):
         self.C4.Send_Properties_Light()
 
     def test(self):
-        print self.TCP_IP
+        self.openCom()
+        print self.readWaveformNames()
+
+        t=np.arange(0,2*math.pi,0.01)
+        s= np.sin(t)
+        #    print s
+        print len(s)
+        self.setRunMode("SEQuence")
+        self.createSequence(SequenceLength=1)
+
+        #    awg.sendMessage("*RST")
+        self.deleteWaveforms('test1')
+        self.newWaveform('test1',len(s))
+        self.transmitWaveformData('test1',s,marker1=np.ones(len(s)))
+        self.setChannelWaveform(Channel=1,WaveformName='test1',SequenceIndex=1)
+
+        second =np.arange(0,1,0.002)
+        self.deleteWaveforms(['test2'])
+        self.newWaveform('test2',len(second))
+        self.transmitWaveformData('test2',second)
+        self.setChannelWaveform(2,'test2',1)
+        self.newWaveform('C1_DATA_1',200000)
+        #    awg.sendMessage('*OPC?')
+        #    print awg.readMessage()
+
+        #    pylab.plot(t,s)
+        #    pylab.show()
+        #    awg.deleteWaveforms(names)
+        self.closeCom()
 
 class Channel:
     def __init__(self, index):
@@ -126,7 +154,10 @@ class Trigger:
         self.IMPEDANCE = '1k'
 
     def Send_Properties(self):
-        pass
+        self.setTriggerSource(self.SOURCE)
+        self.setTriggerLevel(self.LEVEL)
+        self.setTriggerSlope(self.SLOPE)
+        self.setTriggerImpedance(self.IMPEDANCE)
 
     def Send_Properties_Light(self):
         pass
@@ -139,7 +170,10 @@ class Event:
         self.EVENT_IMPEDANCE = '1k'
 
     def Send_Properties(self):
-        pass
+        self.setEventLevel(self.LEVEL)
+        self.setEventPolarity(self.POLARITY)
+        self.setEventJumpTiming(self.JUMP_TIMING)
+        self.setEventImpedance(self.EVENT_IMPEDANCE)
 
     def Send_Properties_Light(self):
         pass
@@ -152,7 +186,10 @@ class DC_Output:
         self.DC4 = 0.0
 
     def Send_Properties(self):
-        pass
+        self.setDCOutputLevel(Channel = 1, Level = self.DC1)
+        self.setDCOutputLevel(Channel = 2, Level = self.DC2)
+        self.setDCOutputLevel(Channel = 3, Level = self.DC3)
+        self.setDCOutputLevel(Channel = 4, Level = self.DC4)
 
     def Send_Properties_Light(self):
         pass
