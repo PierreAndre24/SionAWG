@@ -487,7 +487,7 @@ class AWGCom(SocketCom):
         else:
             return msg1, msg2
 
-    def setSeqElementJump(self, SequenceIndex, Type='INDex', Index=1):#TODO implement stringonly
+    def setSeqElementJump(self, SequenceIndex=1, Type='INDex', Index=1):#TODO implement stringonly
         """
         Used to set JumpMode for a sequence Element
         Types are : INDex , NEXT, OFF

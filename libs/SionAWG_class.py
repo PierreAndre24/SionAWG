@@ -51,18 +51,19 @@ class SionAWG(AWGCom):
         """
         Delete all waveforms present.
         """
-        self.openCom()
+
         wfnames = self.readWaveformNames()
         for wfname in wfnames:
-            self.deleteWaveforms(wfname)
-        self.closeCom()
+            if wfname[0] != '*':
+                self.deleteWaveforms(wfname)
+
 
     def SendSequenceLight(self, sequence):
         """
         sequence is a dictionnary with those entries:
             - 'NumberOfElements'
             - 'SequenceElements' = dictionnary of the SequenceElement
-            - 'Channels' = 4 dictionnaries of 'Index', 'Offset', 'Amplitude', 'Delay', 'Output'
+            - 'Channels' = 4 dictionnaries of 'Offset', 'Amplitude', 'Delay', 'Output'
             - 'WaitingSequenceElement' = dict of 'Name', 'Size','Waveform', 'Marker_1', 'Marker_2'
             used to wait for triggers.
 
@@ -72,17 +73,18 @@ class SionAWG(AWGCom):
             Has to be the same definition as WaitingSequenceElement
         """
         # Open the communication
-        self.openCom()
+
 
         self.setRunMode("SEQuence")
         self.createSequence(SequenceLength = sequence['NumberOfElements']* 2)
 
         # Send commands for the offset, amplitude, delay, OUTPUT
-        for channel in sequence['Channels'].values(): #[1, 2, 3, 4]
-            self.changeChannelOffset(Channel=channel[Index], Offset=channel['Offset'])
-            self.changeChannelAmplitude(Channel=channel[Index], Amplitude=channel['Amplitude'])
-            self.changeChannelDelay(Channel=channel[Index], Delay=channel['Delay'])
-            self.setChannelOutput(Channel=channel[Index], Output=channel['Output'])
+        for key in sequence['Channels'].keys(): #[1, 2, 3, 4]
+            channel = sequence['Channels'][key]
+            self.changeChannelOffset(Channel=key, Offset=channel['Offset'])
+            self.changeChannelAmplitude(Channel=key, Amplitude=channel['Amplitude'])
+            self.changeChannelDelay(Channel=key, Delay=channel['Delay'])
+            self.setChannelOutput(Channel=key, Output=channel['Output'])
 
         # Transmit the waiting sequence element
         self.newWaveform(\
@@ -102,11 +104,10 @@ class SionAWG(AWGCom):
             for channel in range(1,5):
                 self.setChannelWaveformSequence(\
                     Channel=channel, \
-                    WaveformName=sequence[WaitingSequenceElement]['Name'], \
+                    WaveformName=sequence['WaitingSequenceElement']['Name'], \
                     SequenceIndex=waitindex)
-            self.setSeqElementGoto(\
+            self.setSeqElementJump(\
                 SequenceIndex=waitindex, \
-                State=1, \
                 Index=seqelindex)
             self.setSeqElementLooping(\
                 SequenceIndex=waitindex,\
@@ -141,8 +142,7 @@ class SionAWG(AWGCom):
                     SequenceIndex=seqelindex, \
                     State=1, \
                     Index=seqelindex + 1)
-        #Close the communication
-        self.closeCom()
+
 
 
     def test(self):
