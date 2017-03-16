@@ -47,6 +47,104 @@ class SionAWG(AWGCom):
         self.C3.Send_Properties_Light()
         self.C4.Send_Properties_Light()
 
+    def DeleteAllWaveforms(self):
+        """
+        Delete all waveforms present.
+        """
+        self.openCom()
+        wfnames = self.readWaveformNames()
+        for wfname in wfnames:
+            self.deleteWaveforms(wfname)
+        self.closeCom()
+
+    def SendSequenceLight(self, sequence):
+        """
+        sequence is a dictionnary with those entries:
+            - 'NumberOfElements'
+            - 'SequenceElements' = dictionnary of the SequenceElement
+            - 'Channels' = 4 dictionnaries of 'Index', 'Offset', 'Amplitude', 'Delay', 'Output'
+            - 'WaitingSequenceElement' = dict of 'Name', 'Size','Waveform', 'Marker_1', 'Marker_2'
+            used to wait for triggers.
+
+        SequenceElement is a dictionnary with:
+            - 'Index'
+            - 'Channels' = 4 dictionnaries of 'Name', 'Size','Waveform', 'Marker_1', 'Marker_2'
+            Has to be the same definition as WaitingSequenceElement
+        """
+        # Open the communication
+        self.openCom()
+
+        self.setRunMode("SEQuence")
+        self.createSequence(SequenceLength = sequence['NumberOfElements']* 2)
+
+        # Send commands for the offset, amplitude, delay, OUTPUT
+        for channel in sequence['Channels'].values(): #[1, 2, 3, 4]
+            self.changeChannelOffset(Channel=channel[Index], Offset=channel['Offset'])
+            self.changeChannelAmplitude(Channel=channel[Index], Amplitude=channel['Amplitude'])
+            self.changeChannelDelay(Channel=channel[Index], Delay=channel['Delay'])
+            self.setChannelOutput(Channel=channel[Index], Output=channel['Output'])
+
+        # Transmit the waiting sequence element
+        self.newWaveform(\
+            name=sequence['WaitingSequenceElement']['Name'], \
+            size=sequence['WaitingSequenceElement']['Size'])
+        self.transmitWaveformData(\
+            name=sequence['WaitingSequenceElement']['Name'], \
+            data=sequence['WaitingSequenceElement']['Waveform'], \
+            marker1=sequence['WaitingSequenceElement']['Marker_1'], \
+            marker2=sequence['WaitingSequenceElement']['Marker_2'])
+
+        # Send all the sequence elements
+        for seqel in sequence['SequenceElements'].values(): #seqel is abbreviation for SequenceElement
+            waitindex = seqel['Index'] * 2 - 1
+            seqelindex = waitindex + 1
+            # Wait for trigger
+            for channel in range(1,5):
+                self.setChannelWaveformSequence(\
+                    Channel=channel, \
+                    WaveformName=sequence[WaitingSequenceElement]['Name'], \
+                    SequenceIndex=waitindex)
+            self.setSeqElementGoto(\
+                SequenceIndex=waitindex, \
+                State=1, \
+                Index=seqelindex)
+            self.setSeqElementLooping(\
+                SequenceIndex=waitindex,\
+                Repeat=1,\
+                InfiniteLoop=1)
+
+            # Set up all four channels
+            for key in seqel['Channels'].keys(): #seqelch stands for sequence element channel
+                # the key = channel
+                seqelch = seqel['Channels'][key]
+                wfname = seqelch['Name']
+                if wfname not in self.readWaveformNames():
+                    self.newWaveform(\
+                        name=wfname, \
+                        size=seqelch['Size'])
+                    self.transmitWaveformData(\
+                        name=wfname, \
+                        data=seqelch['Waveform'], \
+                        marker1=seqelch['Marker_1'], \
+                        marker2=seqelch['Marker_2'])
+                self.setChannelWaveformSequence(\
+                    Channel=key, \
+                    WaveformName=wfname, \
+                    SequenceIndex=seqelindex)
+            if seqelindex == 2 * sequence['NumberOfElements']:# Back to 1st element
+                self.setSeqElementGoto(\
+                    SequenceIndex=seqelindex, \
+                    State=1, \
+                    Index=1)
+            else:
+                self.setSeqElementGoto(\
+                    SequenceIndex=seqelindex, \
+                    State=1, \
+                    Index=seqelindex + 1)
+        #Close the communication
+        self.closeCom()
+
+
     def test(self):
         self.openCom()
         print self.readWaveformNames()
