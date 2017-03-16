@@ -29,13 +29,13 @@ def test():
     awg.deleteWaveforms('test1')
     awg.newWaveform('test1',len(s))
     awg.transmitWaveformData('test1',s,marker1=np.ones(len(s)))
-    awg.setChannelWaveform(Channel=1,WaveformName='test1',SequenceIndex=1)
+    awg.setChannelWaveformSequence(Channel=1,WaveformName='test1',SequenceIndex=1)
 
     second =np.arange(0,1,0.002)
     awg.deleteWaveforms(['test2'])
     awg.newWaveform('test2',len(second))
     awg.transmitWaveformData('test2',second)
-    awg.setChannelWaveform(2,'test2',1)
+    awg.setChannelWaveformSequence(2,'test2',1)
     awg.newWaveform('C1_DATA_1',200000)
     #    awg.sendMessage('*OPC?')
     #    print awg.readMessage()
@@ -446,7 +446,7 @@ class AWGCom(SocketCom):
         else:
             return msg
 
-    def setDCOutputLevel(self, Channel, Level):
+    def setDCOutputLevel(self, Channel, Level, stringOnly=0):
         """
         This command and query sets or returns the DC output level.
         The value of n = 1|2|3|4.
@@ -461,7 +461,7 @@ class AWGCom(SocketCom):
         else:
             return msg
 
-    def createSequence(self, SequenceLength):
+    def createSequence(self, SequenceLength, stringOnly=0):
         """
         This has to be called to initialize a sequence
         """
@@ -472,7 +472,7 @@ class AWGCom(SocketCom):
         else:
             return msg
 
-    def setSeqElementGoto(self, SequenceIndex=1, State=1, Index=1):
+    def setSeqElementGoto(self, SequenceIndex=1, State=1, Index=1, stringOnly=0):
         """
         Used to set JumpMode for a sequence Element
         States are : 0(OFF) , 1(ON)
@@ -487,7 +487,7 @@ class AWGCom(SocketCom):
         else:
             return msg1, msg2
 
-    def setSeqElementJump(self,SequenceIndex,Type='INDex',Index=1):#TODO implement stringonly
+    def setSeqElementJump(self, SequenceIndex, Type='INDex', Index=1):#TODO implement stringonly
         """
         Used to set JumpMode for a sequence Element
         Types are : INDex , NEXT, OFF
