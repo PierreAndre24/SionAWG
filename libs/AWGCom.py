@@ -363,7 +363,7 @@ class AWGCom(SocketCom):
         This command and query sets or returns the trigger slope. It is used to set polarity in modes other than gated mode.
         """
 
-        if Slope == 'Positive'
+        if Slope == 'Positive':
             msg = "TRIGger:SEQuence:SLOPe POSitive"
         else:
             msg = "TRIGger:SEQuence:SLOPe NEGative"
@@ -379,7 +379,7 @@ class AWGCom(SocketCom):
         to the external trigger.
         """
 
-        if Impedance == '1k'
+        if Impedance == '1k':
             msg = "TRIGger:SEQuence:IMPedance 1000"
         else:
             msg = "TRIGger:SEQuence:IMPedance 50"
@@ -406,7 +406,7 @@ class AWGCom(SocketCom):
         This command and query sets or returns the impedance of the external event input. Valid values are 50 ohm or 1 kohm.
         """
 
-        if Impedance == '1k'
+        if Impedance == '1k':
             msg = "EVENt:IMPedance 1000"
         else:
             msg = "EVENt:IMPedance 50"
@@ -421,7 +421,7 @@ class AWGCom(SocketCom):
         This command and query sets or returns the jump timing. Refer to the User Online Help for more information on jump timing.
         """
 
-        if Impedance == 'Async'
+        if Impedance == 'Async':
             msg = "EVENt:JTIMing ASYNchronous"
         else:
             msg = "EVENt:JTIMing SYNChronous"
@@ -436,7 +436,7 @@ class AWGCom(SocketCom):
         This command and query sets or returns the polarity of event signal. The Event Jump is the function to change the sequencing of the waveform by an event signal.
         """
 
-        if Impedance == 'Positive'
+        if Impedance == 'Positive':
             msg = "EVENt:POLarity POSitive"
         else:
             msg = "EVENt:POLarity NEGative"
