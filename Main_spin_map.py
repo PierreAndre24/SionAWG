@@ -12,6 +12,12 @@ def OneGateSpinMap(
         PulsePosition = 15000,\
         WaveformDuration = 16000):
 
+    """
+    Returns NumberPoints pulses (PulseDuration,PulsePosition) on the gate
+    SweepChannel with an amplitude varying from AmplitudeStart to
+    AmplitudeStop.
+    """
+
     norm = max(np.abs(AmplitudeStop),np.abs(AmplitudeStart))
     pulse_amplitudes = np.linspace(AmplitudeStart, AmplitudeStop, NumberPoints) / norm
 
