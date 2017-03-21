@@ -77,6 +77,3 @@ if __name__ == '__main__':
     sion.DeleteAllWaveforms()
     sion.SendSequenceLight(sequence = spinmap)
     sion.closeCom()
-=======
-    OneGateSpinMap()
->>>>>>> Stashed changes
