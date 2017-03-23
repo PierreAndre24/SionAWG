@@ -8,8 +8,8 @@ def ChirpPulse(
         AmplitudeStart = 0.45, \
         AmplitudeStop = 0.45,\
         AmplitudePowerLaw = 1.,\
-        FrequencyStart = 1e7,\
-        FrequencyStop = 3e7,\
+        FrequencyStart = 1e8,\
+        FrequencyStop = 3e8,\
         PulseDuration = 500e-9, \
         PulseDelay = 500e-9,\
         WaveformDuration = 4000e-9,
@@ -42,6 +42,7 @@ def ChirpPulse(
     ychannel = np.zeros((NumberPoints,1))
     delay = int(PulseDelay * SamplingFrequency)
     ychannel[delay:delay+PulseNumberPoints,0] = y
+    wf[SweepChannel]['Waveform'] = ychannel
 
     # Set the Amplitude, Offset, Delay, Output of wf[channel]
     for channel in range(1,5):

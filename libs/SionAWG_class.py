@@ -154,17 +154,17 @@ class SionAWG(AWGCom):
         self.setRunMode("CONTinuous")
 
         # Send commands for the offset, amplitude, delay, OUTPUT
-        for key in wf['Channels'].keys(): #[1, 2, 3, 4]
-            channel = wf['Channels'][key]
+        for key in wf.keys(): #[1, 2, 3, 4]
+            channel = wf[key]
             self.changeChannelOffset(Channel=key, Offset=channel['Offset'])
             self.changeChannelAmplitude(Channel=key, Amplitude=channel['Amplitude'])
             self.changeChannelDelay(Channel=key, Delay=channel['Delay'])
             self.setChannelOutput(Channel=key, Output=channel['Output'])
 
         # Set up all four channels
-        for key in wf['Channels'].keys(): #seqelch stands for sequence element channel
+        for key in wf.keys(): #seqelch stands for sequence element channel
             # the key = channel
-            wfch = wf['Channels'][key]
+            wfch = wf[key]
             wfname = wfch['Name']
             if wfname not in self.readWaveformNames():
                 self.newWaveform(\
