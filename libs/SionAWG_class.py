@@ -143,6 +143,42 @@ class SionAWG(AWGCom):
                     State=1, \
                     Index=seqelindex + 1)
 
+    def SendSingleWFLight(self, wf):
+        """
+        wf is a dictionnary with those entries:
+            - 'Channels' = 4 objects with properties 'Offset', 'Amplitude', 'Delay', 'Output', 'Name', 'Size','Waveform', 'Marker_1', 'Marker_2'
+        """
+        # Open the communication
+
+
+        self.setRunMode("CONTinuous")
+
+        # Send commands for the offset, amplitude, delay, OUTPUT
+        for key in wf['Channels'].keys(): #[1, 2, 3, 4]
+            channel = wf['Channels'][key]
+            self.changeChannelOffset(Channel=key, Offset=channel['Offset'])
+            self.changeChannelAmplitude(Channel=key, Amplitude=channel['Amplitude'])
+            self.changeChannelDelay(Channel=key, Delay=channel['Delay'])
+            self.setChannelOutput(Channel=key, Output=channel['Output'])
+
+        # Set up all four channels
+        for key in wf['Channels'].keys(): #seqelch stands for sequence element channel
+            # the key = channel
+            wfch = wf['Channels'][key]
+            wfname = wfch['Name']
+            if wfname not in self.readWaveformNames():
+                self.newWaveform(\
+                    name=wfname, \
+                    size=wfch['Size'])
+                self.transmitWaveformData(\
+                    name=wfname, \
+                    data=wfch['Waveform'], \
+                    marker1=wfch['Marker_1'], \
+                    marker2=wfch['Marker_2'])
+            self.setChannelWaveform(\
+                Channel=key, \
+                WaveformName=wfname)
+
 
 
     def test(self):
