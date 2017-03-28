@@ -5,12 +5,12 @@ from libs.SionAWG_class import SionAWG
 
 def OneGateSpinMap(
         SweepChannel = 1,\
-        AmplitudeStart = 0, \
-        AmplitudeStop = 0.5,\
-        NumberPoints = 50,\
+        AmplitudeStart = 0.0, \
+        AmplitudeStop = 0.9,\
+        NumberPoints = 60,\
         PulseDuration = 50, \
-        PulsePosition = 15000,\
-        WaveformDuration = 16000):
+        PulsePosition = 1000,\
+        WaveformDuration = 2000):
 
     """
     Returns NumberPoints pulses (PulseDuration,PulsePosition) on the gate
