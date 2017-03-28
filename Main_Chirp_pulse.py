@@ -5,15 +5,15 @@ import matplotlib.pyplot as plt
 
 def ChirpPulse(
         SweepChannel = 1,\
-        AmplitudeStart = 0.45, \
-        AmplitudeStop = 0.45,\
-        AmplitudePowerLaw = 1.,\
-        FrequencyStart = 1e8,\
-        FrequencyStop = 3e8,\
+        AmplitudeStart = 0.5, \
+        AmplitudeStop = 0.1,\
+        AmplitudePowerLaw = float(2/3`),\
+        FrequencyStart = 0.01e8,\
+        FrequencyStop = 1e8,\
         PulseDuration = 500e-9, \
-        PulseDelay = 500e-9,\
-        WaveformDuration = 4000e-9,
-        SamplingFrequency = 1200000000):
+        PulseDelay = 00e-9,\
+        WaveformDuration = 500e-9,
+        SamplingFrequency = 12000000000):
     # 'Offset', 'Amplitude', 'Delay', 'Output',
     # 'Name', 'Size',
     # 'Waveform', 'Marker_1', 'Marker_2'
@@ -43,6 +43,7 @@ def ChirpPulse(
     delay = int(PulseDelay * SamplingFrequency)
     ychannel[delay:delay+PulseNumberPoints,0] = y
     wf[SweepChannel]['Waveform'] = ychannel
+    wf[2]['Waveform']  = marker11 * 2
 
     # Set the Amplitude, Offset, Delay, Output of wf[channel]
     for channel in range(1,5):
@@ -55,25 +56,27 @@ def ChirpPulse(
         else:
             wf[channel]['Amplitude'] = 0.02
 
-    return wf
+    # return wf
+    return ychannel
 
 def Px(x, n, P0, P1):
     return (P1-P0)*x**n + P0
 
 if __name__ == '__main__':
-    sion = SionAWG('192.168.1.117', 4000)
-
-    chirppulse = ChirpPulse()
-
-    sion.openCom()
-    sion.DeleteAllWaveforms()
-    sion.SendSingleWFLight(wf = chirppulse)
-    sion.closeCom()
-
-    # ychannel = ChirpPulse()
-    # plt.plot(ychannel)
-    # plt.xlabel('Time')
-    # plt.ylabel('Amplitude')
-    # plt.grid(True)
+    # sion = SionAWG('192.168.1.117', 4000)
+    # sion = SionAWG('10.0.0.4', 4000)
     #
-    # plt.show()
+    # chirppulse = ChirpPulse()
+    #
+    # sion.openCom()
+    # sion.DeleteAllWaveforms()
+    # sion.SendSingleWFLight(wf = chirppulse)
+    # sion.closeCom()
+
+    ychannel = ChirpPulse()
+    plt.plot(ychannel)
+    plt.xlabel('Time')
+    plt.ylabel('Amplitude')
+    plt.grid(True)
+
+    plt.show()

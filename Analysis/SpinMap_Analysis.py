@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 XP = MultiDimExperiment.MultiDimExperiment()
 FM = ExperimentFileManager.ExperimentFileManager(XP)
-filepath = '/Users/pierre-andremortemousque/Documents/Research/2014-15_Neel/Experimental/Ratatouille/Ratatouille32CD11f2'
+filepath = '/Users/pierre-andremortemousque/Documents/Research/2014-15_Neel/Experimental/Ratatouille/Ratatouille32CD12f0'
 filename = 'stab11_488'
 ExperimentType = 'SpinMap'
 
@@ -41,7 +41,7 @@ if True:
         group_name = 'raw_data')
 
     # init, BL loaded, TR loaded, TL loaded, BL unloaded, TR unloaded, TL unloaded
-    region = [118,240]
+    region = [91,200]
 
     final_shape = XP.ExperimentalData['dimensions']
     final_shape[1] = region[1]-region[0]
@@ -94,17 +94,14 @@ if False:
     #timings = timings.flatten()
 
     locdim = XP.ExperimentalData['dimensions']
-    step3 = 0
-    n_thresholds = 20
-    #threshold = 0.00033
-    thresholds = np.linspace(0.0003,0.0005,n_thresholds)
+    thres = 0.00033
     index_min = 2
     index_max = locdim[1]
     counts = np.zeros((locdim[2],locdim[3]))
 
 
     for i in range(locdim[4]): # Over all repetitions
-        for j in range(locdim[3])
+        for j in range(locdim[3]):
             for k in range(locdim[2]): # all timings
                 if np.any(XP.ExperimentalData['data'][0, index_min:index_max, k, j, i]>thres):
                     counts[k,j] += 1
