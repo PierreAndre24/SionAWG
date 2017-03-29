@@ -5,9 +5,9 @@ from libs.SionAWG_class import SionAWG
 
 def OneGateSpinMap(
         SweepChannel = 1,\
-        AmplitudeStart = 0.0, \
-        AmplitudeStop = 0.9,\
-        NumberPoints = 60,\
+        AmplitudeStart = 0.15, \
+        AmplitudeStop = 0.95,\
+        NumberPoints = 80,\
         PulseDuration = 50, \
         PulsePosition = 1000,\
         WaveformDuration = 2000):

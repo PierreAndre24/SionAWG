@@ -126,7 +126,18 @@ def OneGateRabiTime(
 if __name__ == '__main__':
     sion = SionAWG('192.168.1.117', 4000)
 
-    rabi = OneGateRabiTime()
+    rabi = OneGateRabiTime(\
+		SweepChannel = 1,\
+        ExchangeTimeStart = 0, \
+        ExchangeTimeStop = 80,\
+        RampTime = 1000, \
+        VoltageTp = 0.35,\
+        VoltageUpDown = 0.48,\
+        VoltageST = 0.39,\
+        WaveformDuration = 2500,\
+        WaitBeforeExchangeTime = 2,\
+        WaitAfterExchangeTime = 2,\
+        WaitAfterSequence = 2)
     sion.openCom()
     sion.DeleteAllWaveforms()
     sion.SendSequenceLight(sequence = rabi)
