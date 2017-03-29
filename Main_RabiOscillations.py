@@ -120,10 +120,19 @@ def OneGateRabiTime(
         else:
             sequence['Channels'][channel]['Amplitude'] = 0.02
 
-    return sequence
-    # return RabiSequences
+    # return sequence
+    return RabiSequences
 
 if __name__ == '__main__':
+<<<<<<< HEAD
+    # sion = SionAWG('192.168.1.117', 4000)
+    #
+    # rabi = OneGateRabiTime()
+    # sion.openCom()
+    # sion.DeleteAllWaveforms()
+    # sion.SendSequenceLight(sequence = rabi)
+    # sion.closeCom()
+=======
     sion = SionAWG('192.168.1.117', 4000)
 
     rabi = OneGateRabiTime(\
@@ -142,24 +151,26 @@ if __name__ == '__main__':
     sion.DeleteAllWaveforms()
     sion.SendSequenceLight(sequence = rabi)
     sion.closeCom()
+>>>>>>> origin/master
 
 
     # ychannel = RabiCycle()
     # plt.plot(ychannel)
 
-    # xyz = OneGateRabiTime(
-    #         SweepChannel = 1,\
-    #         ExchangeTimeStart = 0, \
-    #         ExchangeTimeStop = 80,\
-    #         RampTime = 1000, \
-    #         VoltageTp = 0.35,\
-    #         VoltageUpDown = 0.45,\
-    #         VoltageST = 0.37,\
-    #         WaveformDuration = 2500,\
-    #         WaitBeforeExchangeTime = 2,\
-    #         WaitAfterExchangeTime = 2,\
-    #         WaitAfterSequence = 2)
-    # plt.pcolor(xyz)
+    xyz = OneGateRabiTime(
+            SweepChannel = 1,\
+            ExchangeTimeStart = 0, \
+            ExchangeTimeStop = 80,\
+            RampTime = 1000, \
+            VoltageTp = 0.35,\
+            VoltageUpDown = 0.45,\
+            VoltageST = 0.37,\
+            WaveformDuration = 2500,\
+            WaitBeforeExchangeTime = 2,\
+            WaitAfterExchangeTime = 2,\
+            WaitAfterSequence = 2)
+    plt.pcolor(xyz)
+    plt.xlabel(r"$\varepsilon$")
 
-    # plt.grid(True)
-    # plt.show()
+    plt.grid(True)
+    plt.show()

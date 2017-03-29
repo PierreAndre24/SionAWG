@@ -7,7 +7,7 @@ def ChirpPulse(
         SweepChannel = 1,\
         AmplitudeStart = 0.5, \
         AmplitudeStop = 0.1,\
-        AmplitudePowerLaw = float(2/3`),\
+        AmplitudePowerLaw = float(2/3.),\
         FrequencyStart = 0.01e8,\
         FrequencyStop = 1e8,\
         PulseDuration = 500e-9, \
@@ -21,7 +21,7 @@ def ChirpPulse(
     NumberPoints = int(WaveformDuration * SamplingFrequency)
     wf = {}
     # init channels
-    for channel in range(1,5):
+    for channel in range(1,2):
         wf[channel] = {}
         wf[channel]['Name'] = 'Channel'+str(channel)
         wf[channel]['Size'] = NumberPoints
@@ -46,7 +46,7 @@ def ChirpPulse(
     wf[2]['Waveform']  = marker11 * 2
 
     # Set the Amplitude, Offset, Delay, Output of wf[channel]
-    for channel in range(1,5):
+    for channel in range(1,2):
         wf[channel]['Offset'] = 0.0
         wf[channel]['Delay'] = 0.0
         wf[channel]['Output'] = False
@@ -57,7 +57,7 @@ def ChirpPulse(
             wf[channel]['Amplitude'] = 0.02
 
     # return wf
-    return ychannel
+    return wf, ychannel
 
 def Px(x, n, P0, P1):
     return (P1-P0)*x**n + P0
@@ -66,14 +66,14 @@ if __name__ == '__main__':
     # sion = SionAWG('192.168.1.117', 4000)
     # sion = SionAWG('10.0.0.4', 4000)
     #
-    # chirppulse = ChirpPulse()
+    # chirppulse, ychannel = ChirpPulse()
     #
     # sion.openCom()
     # sion.DeleteAllWaveforms()
     # sion.SendSingleWFLight(wf = chirppulse)
     # sion.closeCom()
 
-    ychannel = ChirpPulse()
+    chirppulse, ychannel = ChirpPulse()
     plt.plot(ychannel)
     plt.xlabel('Time')
     plt.ylabel('Amplitude')
