@@ -6,14 +6,14 @@ import matplotlib.pyplot as plt
 def ChirpPulse(
         SweepChannel = 1,\
         AmplitudeStart = 0.5, \
-        AmplitudeStop = 0.1,\
-        AmplitudePowerLaw = float(2/3.),\
-        FrequencyStart = 0.01e8,\
-        FrequencyStop = 1e8,\
-        PulseDuration = 500e-9, \
+        AmplitudeStop = 0.5,\
+        AmplitudePowerLaw = float(1.),\
+        FrequencyStart = 1.45e8,\
+        FrequencyStop = 2.7e8,\
+        PulseDuration = 1500e-9, \
         PulseDelay = 00e-9,\
-        WaveformDuration = 500e-9,
-        SamplingFrequency = 12000000000):
+        WaveformDuration = 8000e-9,
+        SamplingFrequency = 3000000000):
     # 'Offset', 'Amplitude', 'Delay', 'Output',
     # 'Name', 'Size',
     # 'Waveform', 'Marker_1', 'Marker_2'
@@ -21,7 +21,7 @@ def ChirpPulse(
     NumberPoints = int(WaveformDuration * SamplingFrequency)
     wf = {}
     # init channels
-    for channel in range(1,2):
+    for channel in range(1,3):
         wf[channel] = {}
         wf[channel]['Name'] = 'Channel'+str(channel)
         wf[channel]['Size'] = NumberPoints
@@ -32,7 +32,8 @@ def ChirpPulse(
     # Marker_1_1
     marker11 = np.zeros((NumberPoints,1))
     marker11[0:100,0] = 1
-    wf[channel]['Marker_1'] = marker11
+    # wf[channel]['Marker_1'] = marker11
+
 
     #Generate chirp
     PulseNumberPoints = int(PulseDuration * SamplingFrequency)
@@ -42,11 +43,17 @@ def ChirpPulse(
     ychannel = np.zeros((NumberPoints,1))
     delay = int(PulseDelay * SamplingFrequency)
     ychannel[delay:delay+PulseNumberPoints,0] = y
-    wf[SweepChannel]['Waveform'] = ychannel
+    # wf[SweepChannel]['Waveform'] = ychannel
     wf[2]['Waveform']  = marker11 * 2
 
+    corr = np.ones((NumberPoints,1))
+    index = int(PulseNumberPoints/(270.-100.)*(165.-100))
+    corr[0:index] = -0.4
+    wf[SweepChannel]['Waveform'] = ychannel * corr
+
+
     # Set the Amplitude, Offset, Delay, Output of wf[channel]
-    for channel in range(1,2):
+    for channel in range(1,3):
         wf[channel]['Offset'] = 0.0
         wf[channel]['Delay'] = 0.0
         wf[channel]['Output'] = False
@@ -64,19 +71,19 @@ def Px(x, n, P0, P1):
 
 if __name__ == '__main__':
     # sion = SionAWG('192.168.1.117', 4000)
-    # sion = SionAWG('10.0.0.4', 4000)
-    #
-    # chirppulse, ychannel = ChirpPulse()
-    #
-    # sion.openCom()
-    # sion.DeleteAllWaveforms()
-    # sion.SendSingleWFLight(wf = chirppulse)
-    # sion.closeCom()
+    sion = SionAWG('10.0.0.4', 4000)
 
     chirppulse, ychannel = ChirpPulse()
-    plt.plot(ychannel)
-    plt.xlabel('Time')
-    plt.ylabel('Amplitude')
-    plt.grid(True)
 
-    plt.show()
+    sion.openCom()
+    sion.DeleteAllWaveforms()
+    sion.SendSingleWFLight(wf = chirppulse)
+    sion.closeCom()
+
+    # chirppulse, ychannel = ChirpPulse()
+    # plt.plot(ychannel)
+    # plt.xlabel('Time')
+    # plt.ylabel('Amplitude')
+    # plt.grid(True)
+    #
+    # plt.show()
