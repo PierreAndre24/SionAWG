@@ -1,6 +1,7 @@
 from __future__ import division
 import numpy as np
 from libs.SionAWG_class import SionAWG
+from libs.miscellanii import Normalize_sequence
 
 
 def OneGateSpinMap(
@@ -68,6 +69,72 @@ def OneGateSpinMap(
             sequence['Channels'][channel]['Amplitude'] = 0.02
 
     return sequence
+
+def FourGatesSquareSequence(SequenceInfo):
+    '''
+    SequenceInfo = dict:
+        - 'Dimensions' = [n_i, n_j, ...]
+        - 'WaitDuration' = waiting element duration
+        - 'Elements' = dict:
+            - i = dict:
+                - Vg1 = np.array([]) @ current index
+                - Vg2 = np.array([]) @ current index
+                - Vg3 = np.array([]) @ current index
+                - Vg4 = np.array([]) @ current index
+                - Duration
+                - connection to next point = 'flat'(default), 'linear ramp'
+    '''
+
+    # Determine the number of element in the sequence
+    locdim = SequenceInfo['Dimensions']
+    NumberPoints = np.prod(np.array(locdim)) # How many different waveforms (except waits)
+
+    # Init the sequence
+    sequence = {}
+    sequence['WaitingSequenceElement'] = {}
+    sequence['SequenceElements'] = {}
+    sequence['Channels'] = {}
+    sequence['NumberOfElements'] = NumberPoints
+
+    # Build WaitingSequenceElement
+    wait = {}
+    wait['Name'] = 'Wait'
+    wait['Size'] = SequenceInfo['WaitDuration']
+    wait['Waveform'] = np.zeros((SequenceInfo['WaitDuration'],1))
+    wait['Marker_1'] = []
+    wait['Marker_2'] = []
+    sequence['WaitingSequenceElement'] = wait
+
+    # Build SequenceElements
+    # We are dealing only with 'square' scans
+    # if a
+    for i in np.arange(NumberPoints):
+        abc = np.unravel_index(i, np.array(locdim))
+        i = i+1 #because the awg starts counting from 1
+        sequence['SequenceElements'][i] = {}
+        sequence['SequenceElements'][i]['Index'] = i
+        sequence['SequenceElements'][i]['Channels'] = {}
+        for channel in range(1,5):
+            WaveformDuration, wf = Build_WF_from_SequenceInfo(SequenceInfo, abc, channel)
+            sequence['SequenceElements'][i]['Channels'][channel] = {}
+            sequence['SequenceElements'][i]['Channels'][channel]['Name'] = 'C'+str(channel)+'P'+str(i)
+            sequence['SequenceElements'][i]['Channels'][channel]['Size'] = WaveformDuration
+            sequence['SequenceElements'][i]['Channels'][channel]['Waveform'] = np.zeros((WaveformDuration,1))
+            sequence['SequenceElements'][i]['Channels'][channel]['Marker_1'] = []
+            sequence['SequenceElements'][i]['Channels'][channel]['Marker_2'] = []
+            sequence['SequenceElements'][i]['Channels'][channel]['Waveform'] = wf
+
+    # Set the Amplitude, Offset, Delay, Output of sequence['Channels']
+    sequence, Vpp = Normalize_sequence(sequence)
+    for channel in range(1,5):
+        sequence['Channels'][channel] = {}
+        sequence['Channels'][channel]['Offset'] = 0.0
+        sequence['Channels'][channel]['Delay'] = 0.0
+        sequence['Channels'][channel]['Output'] = False
+        sequence['Channels'][channel]['Amplitude'] = Vpp[channel-1]
+
+    return sequence
+
 
 if __name__ == '__main__':
     sion = SionAWG('192.168.1.117', 4000)
