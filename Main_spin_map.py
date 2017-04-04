@@ -1,8 +1,12 @@
+# encoding: utf-8
 from __future__ import division
+import os, sys
+sys.path.append(os.path.abspath('C:\\DATA\\Ratatouille\\Ratatouille32CD12f2\\'))
+from stab12_701_SequenceDict import Generate_SequenceInfo
 import numpy as np
 from libs.SionAWG_class import SionAWG
 from libs.miscellanii import Normalize_sequence
-
+from libs.miscellanii import Build_WF_from_SequenceInfo
 
 def OneGateSpinMap(
         SweepChannel = 1,\
@@ -126,12 +130,14 @@ def FourGatesSquareSequence(SequenceInfo):
 
     # Set the Amplitude, Offset, Delay, Output of sequence['Channels']
     sequence, Vpp = Normalize_sequence(sequence)
+    print Vpp
     for channel in range(1,5):
         sequence['Channels'][channel] = {}
         sequence['Channels'][channel]['Offset'] = 0.0
         sequence['Channels'][channel]['Delay'] = 0.0
         sequence['Channels'][channel]['Output'] = False
-        sequence['Channels'][channel]['Amplitude'] = Vpp[channel-1]
+        print Vpp[channel-1]
+        sequence['Channels'][channel]['Amplitude'] = Vpp[channel-1,0]
 
     return sequence
 
@@ -139,7 +145,10 @@ def FourGatesSquareSequence(SequenceInfo):
 if __name__ == '__main__':
     sion = SionAWG('192.168.1.117', 4000)
 
-    spinmap = OneGateSpinMap()
+    #spinmap = OneGateSpinMap()
+    
+    seqinf = Generate_SequenceInfo()
+    spinmap = FourGatesSquareSequence(seqinf)
     sion.openCom()
     sion.DeleteAllWaveforms()
     sion.SendSequenceLight(sequence = spinmap)
