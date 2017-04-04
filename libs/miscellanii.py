@@ -13,7 +13,6 @@ def Normalize_sequence(sequence):
 
 
     # Normalize the waveforms
-    print sequence['SequenceElements'].keys()
     for i in sequence['SequenceElements'].keys():
         for channel in sequence['SequenceElements'][i]['Channels'].keys():
             sequence['SequenceElements'][i]['Channels'][channel]['Waveform'] = \
@@ -45,6 +44,7 @@ def Build_WF_from_SequenceInfo(SequenceInfo, abc, channel):
         else:
             di = int(P['Duration'][abc])
 
+        #print abc, channel, P[channel], P[channel].shape
         # Determine the relevant voltage
         if P[channel].shape == (1,):
             v = P[channel][0]

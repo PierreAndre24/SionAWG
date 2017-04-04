@@ -1,8 +1,8 @@
 # encoding: utf-8
 from __future__ import division
 import os, sys
-sys.path.append(os.path.abspath('C:\\DATA\\Ratatouille\\Ratatouille32CD12f2\\'))
-from stab12_701_SequenceDict import Generate_SequenceInfo
+sys.path.append(os.path.abspath('C:\\DATA\\Ratatouille\\Ratatouille32CD12f2'))
+from stab12_703_SequenceDict import Generate_SequenceInfo
 import numpy as np
 from libs.SionAWG_class import SionAWG
 from libs.miscellanii import Normalize_sequence
@@ -130,13 +130,11 @@ def FourGatesSquareSequence(SequenceInfo):
 
     # Set the Amplitude, Offset, Delay, Output of sequence['Channels']
     sequence, Vpp = Normalize_sequence(sequence)
-    print Vpp
     for channel in range(1,5):
         sequence['Channels'][channel] = {}
         sequence['Channels'][channel]['Offset'] = 0.0
         sequence['Channels'][channel]['Delay'] = 0.0
         sequence['Channels'][channel]['Output'] = False
-        print Vpp[channel-1]
         sequence['Channels'][channel]['Amplitude'] = Vpp[channel-1,0]
 
     return sequence
