@@ -74,7 +74,7 @@ def OneGateSpinMap(
 
     return sequence
 
-def FourGatesSquareSequence(SequenceInfo):
+def FourGatesSequence(SequenceInfo):
     '''
     SequenceInfo = dict:
         - 'Dimensions' = [n_i, n_j, ...]
@@ -91,14 +91,16 @@ def FourGatesSquareSequence(SequenceInfo):
 
     # Determine the number of element in the sequence
     locdim = SequenceInfo['Dimensions']
-    NumberPoints = np.prod(np.array(locdim)) # How many different waveforms (except waits)
+    SequenceLength = np.prod(np.array(locdim)) # How many different waveforms (except waits)
 
     # Init the sequence
     sequence = {}
     sequence['WaitingSequenceElement'] = {}
     sequence['SequenceElements'] = {}
     sequence['Channels'] = {}
-    sequence['NumberOfElements'] = NumberPoints
+    sequence['Sequence'] = {}
+    sequence['SequenceLength'] = SequenceLength
+    sequence['NumberOfElements'] = GetNumberOfElements_from_SequenceInfo(SequenceInfo)
 
     # Build WaitingSequenceElement
     wait = {}
@@ -109,24 +111,9 @@ def FourGatesSquareSequence(SequenceInfo):
     wait['Marker_2'] = []
     sequence['WaitingSequenceElement'] = wait
 
-    # Build SequenceElements
-    # We are dealing only with 'square' scans
-    # if a
-    for i in np.arange(NumberPoints):
-        abc = np.unravel_index(i, np.array(locdim))
-        i = i+1 #because the awg starts counting from 1
-        sequence['SequenceElements'][i] = {}
-        sequence['SequenceElements'][i]['Index'] = i
-        sequence['SequenceElements'][i]['Channels'] = {}
-        for channel in range(1,5):
-            WaveformDuration, wf = Build_WF_from_SequenceInfo(SequenceInfo, abc, channel)
-            sequence['SequenceElements'][i]['Channels'][channel] = {}
-            sequence['SequenceElements'][i]['Channels'][channel]['Name'] = 'C'+str(channel)+'P'+str(i)
-            sequence['SequenceElements'][i]['Channels'][channel]['Size'] = WaveformDuration
-            sequence['SequenceElements'][i]['Channels'][channel]['Waveform'] = np.zeros((WaveformDuration,1))
-            sequence['SequenceElements'][i]['Channels'][channel]['Marker_1'] = []
-            sequence['SequenceElements'][i]['Channels'][channel]['Marker_2'] = []
-            sequence['SequenceElements'][i]['Channels'][channel]['Waveform'] = wf
+    # Build SequenceElements (only distinct wfs)
+    # Build Sequence (l * n * m * ... dimensions, only wf names)
+    sequence['SequenceElements'], sequence['Sequence'] = Build_WFs_from_SequenceInfo(SequenceInfo)
 
     # Set the Amplitude, Offset, Delay, Output of sequence['Channels']
     sequence, Vpp = Normalize_sequence(sequence)
@@ -144,9 +131,9 @@ if __name__ == '__main__':
     sion = SionAWG('192.168.1.117', 4000)
 
     #spinmap = OneGateSpinMap()
-    
+
     seqinf = Generate_SequenceInfo()
-    spinmap = FourGatesSquareSequence(seqinf)
+    spinmap = FourGatesSequence(seqinf)
     sion.openCom()
     sion.DeleteAllWaveforms()
     sion.SendSequenceLight(sequence = spinmap)
