@@ -65,7 +65,6 @@ def _Build_WF_from_SequenceInfo(SequenceInfo, abc, channel, wfname):
         else:
             di = int(P['Duration'][abc])
 
-        #print abc, channel, P[channel], P[channel].shape
         # Determine the relevant voltage
         if P[channel].shape == (1,):
             v = P[channel][0]
@@ -98,7 +97,6 @@ def _update_pulse_dimensions(new_stuff, pulse_dimensions):
     # obvisouly, those things have to have the same shape
     #new_pulse_dimensions = [1 for i in pulse_dimensions]
     for i, (new,old) in enumerate(zip(new_stuff, pulse_dimensions)):
-        print i, (new,old)
         if new > old:
             pulse_dimensions[i] = new
         else:
@@ -120,7 +118,6 @@ def Build_WFs_from_SequenceInfo(SequenceInfo):
         BOOL_ConstantPulse = True
         for P in SequenceInfo['Elements'].values():
             # Constant pulse
-            print P[channel].shape
             if (P[channel].shape == (1,)) and (P['Duration'].shape == (1,)):
                 BOOL_ConstantPulse = BOOL_ConstantPulse and True
             else:
@@ -149,7 +146,6 @@ def Build_WFs_from_SequenceInfo(SequenceInfo):
             for i in np.arange(n_pulses):
                 index = np.unravel_index(i, pulse_dimensions)
                 wfname = 'C'+str(channel)
-                print index, pulse_dimensions
                 for j, (d, pulse_dim_j) in enumerate(zip(index, pulse_dimensions)):
                     if pulse_dim_j > 1:
                         wfname = wfname + ascii_lowercase[j] + str(d)
@@ -166,5 +162,4 @@ def Build_WFs_from_SequenceInfo(SequenceInfo):
                 Sequence[i]['Channels'][channel] = wfname
                 
     # return things
-    print SequenceElements.keys()
     return SequenceElements, Sequence
