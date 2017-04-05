@@ -166,47 +166,48 @@ class SionAWG(AWGCom):
 
 
         self.setRunMode("SEQuence")
-        self.createSequence(SequenceLength = sequence['SequenceLength']* 2)
+        self.createSequence(SequenceLength = mdsequence['SequenceLength']* 2)
 
         # Send commands for the offset, amplitude, delay, OUTPUT
-        for key in sequence['Channels'].keys(): #[1, 2, 3, 4]
-            channel = sequence['Channels'][key]
+        for key in mdsequence['Channels'].keys(): #[1, 2, 3, 4]
+            channel = mdsequence['Channels'][key]
             self.changeChannelOffset(Channel=key, Offset=channel['Offset'])
             self.changeChannelAmplitude(Channel=key, Amplitude=channel['Amplitude'])
             self.changeChannelDelay(Channel=key, Delay=channel['Delay'])
             self.setChannelOutput(Channel=key, Output=channel['Output'])
 
-        # Transmit the waiting sequence element
+        # Transmit the waiting mdsequence element
         self.newWaveform(\
-            name=sequence['WaitingSequenceElement']['Name'], \
-            size=sequence['WaitingSequenceElement']['Size'])
+            name=mdsequence['WaitingSequenceElement']['Name'], \
+            size=mdsequence['WaitingSequenceElement']['Size'])
         self.transmitWaveformData(\
-            name=sequence['WaitingSequenceElement']['Name'], \
-            data=sequence['WaitingSequenceElement']['Waveform'], \
-            marker1=sequence['WaitingSequenceElement']['Marker_1'], \
-            marker2=sequence['WaitingSequenceElement']['Marker_2'])
+            name=mdsequence['WaitingSequenceElement']['Name'], \
+            data=mdsequence['WaitingSequenceElement']['Waveform'], \
+            marker1=mdsequence['WaitingSequenceElement']['Marker_1'], \
+            marker2=mdsequence['WaitingSequenceElement']['Marker_2'])
 
-        # Transmit all the sequence elements
-        for seqel in sequence['SequenceElements'].values(): #seqel is abbreviation for SequenceElement
-            wfname = seqelch['Name']
+        # Transmit all the mdsequence elements
+        for seqel in mdsequence['SequenceElements'].values(): #seqel is abbreviation for SequenceElement
+            
+            wfname = seqel['Name']
             self.newWaveform(\
                 name=wfname, \
-                size=seqelch['Size'])
+                size=seqel['Size'])
             self.transmitWaveformData(\
                 name=wfname, \
-                data=seqelch['Waveform'], \
-                marker1=seqelch['Marker_1'], \
-                marker2=seqelch['Marker_2'])
+                data=seqel['Waveform'], \
+                marker1=seqel['Marker_1'], \
+                marker2=seqel['Marker_2'])
 
-        # Send all the sequence elements
-        for seqel in sequence['Sequence'].values(): #seqel is abbreviation for SequenceElement
+        # Send all the mdsequence elements
+        for seqel in mdsequence['Sequence'].values(): #seqel is abbreviation for SequenceElement
             waitindex = seqel['Index'] * 2 - 1
             seqelindex = waitindex + 1
             # Wait for trigger
             for channel in range(1,5):
                 self.setChannelWaveformSequence(\
                     Channel=channel, \
-                    WaveformName=sequence['WaitingSequenceElement']['Name'], \
+                    WaveformName=mdsequence['WaitingSequenceElement']['Name'], \
                     SequenceIndex=waitindex)
             self.setSeqElementJump(\
                 SequenceIndex=waitindex, \
@@ -217,14 +218,14 @@ class SionAWG(AWGCom):
                 InfiniteLoop=1)
 
             # Set up all four channels
-            for key in seqel['Channels'].keys(): #seqelch stands for sequence element channel
+            for key in seqel['Channels'].keys(): #seqelch stands for mdsequence element channel
                 # the key = channel
                 wfname = seqel['Channels'][key]
                 self.setChannelWaveformSequence(\
                     Channel=key, \
                     WaveformName=wfname, \
                     SequenceIndex=seqelindex)
-            if seqelindex == 2 * sequence['SequenceLength']:# Back to 1st element
+            if seqelindex == 2 * mdsequence['SequenceLength']:# Back to 1st element
                 self.setSeqElementGoto(\
                     SequenceIndex=seqelindex, \
                     State=1, \

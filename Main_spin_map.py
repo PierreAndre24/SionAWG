@@ -2,11 +2,11 @@
 from __future__ import division
 import os, sys
 sys.path.append(os.path.abspath('C:\\DATA\\Ratatouille\\Ratatouille32CD12f2'))
-from stab12_703_SequenceDict import Generate_SequenceInfo
+from stab12_705_SequenceDict import Generate_SequenceInfo
 import numpy as np
 from libs.SionAWG_class import SionAWG
-from libs.miscellanii import Normalize_sequence
-from libs.miscellanii import Build_WF_from_SequenceInfo
+from libs.miscellanii import Normalize_mdsequence
+from libs.miscellanii import Build_WFs_from_SequenceInfo
 
 def OneGateSpinMap(
         SweepChannel = 1,\
@@ -90,8 +90,7 @@ def FourGatesSequence(SequenceInfo):
     '''
 
     # Determine the number of element in the sequence
-    locdim = SequenceInfo['Dimensions']
-    SequenceLength = np.prod(np.array(locdim)) # How many different waveforms (except waits)
+    SequenceLength = np.prod(np.array(SequenceInfo['Dimensions'])) # How many different waveforms (except waits)
 
     # Init the sequence
     sequence = {}
@@ -100,7 +99,7 @@ def FourGatesSequence(SequenceInfo):
     sequence['Channels'] = {}
     sequence['Sequence'] = {}
     sequence['SequenceLength'] = SequenceLength
-    sequence['NumberOfElements'] = GetNumberOfElements_from_SequenceInfo(SequenceInfo)
+    sequence['NumberOfElements'] = 0 #To be filled later
 
     # Build WaitingSequenceElement
     wait = {}
@@ -114,9 +113,10 @@ def FourGatesSequence(SequenceInfo):
     # Build SequenceElements (only distinct wfs)
     # Build Sequence (l * n * m * ... dimensions, only wf names)
     sequence['SequenceElements'], sequence['Sequence'] = Build_WFs_from_SequenceInfo(SequenceInfo)
-
+    sequence['NumberOfElements'] = len(sequence['SequenceElements'].keys()) 
+    
     # Set the Amplitude, Offset, Delay, Output of sequence['Channels']
-    sequence, Vpp = Normalize_sequence(sequence)
+    sequence, Vpp = Normalize_mdsequence(sequence)
     for channel in range(1,5):
         sequence['Channels'][channel] = {}
         sequence['Channels'][channel]['Offset'] = 0.0
@@ -136,5 +136,6 @@ if __name__ == '__main__':
     spinmap = FourGatesSequence(seqinf)
     sion.openCom()
     sion.DeleteAllWaveforms()
-    sion.SendSequenceLight(sequence = spinmap)
+    #sion.SendSequenceLight(sequence = spinmap)
+    sion.SendMultiDimensionnalSequenceLight(mdsequence = spinmap)
     sion.closeCom()
