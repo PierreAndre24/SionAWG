@@ -44,13 +44,14 @@ class SocketCom(object):
         self.TCP_IP = Ip
         self.TCP_PORT = Port
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.BUFFER_SIZE = 1024
+        #self.BUFFER_SIZE = 1024
+        self.BUFFER_SIZE = 8*1024
         self.msgEnd=EndOfMessage
         self.delimiter=Delimiter
 
     def openCom(self):
         self.s.connect((self.TCP_IP, self.TCP_PORT))
-        self.s.settimeout(30)
+        self.s.settimeout(300)
 
     def closeCom(self):
         self.s.close()
