@@ -2,7 +2,8 @@
 from __future__ import division
 import os, sys
 sys.path.append(os.path.abspath('C:\\DATA\\Ratatouille\\Ratatouille32CD12f3'))
-from stab12_728_SequenceDict import Generate_SequenceInfo
+# sys.path.append(os.path.abspath('/Users/pierre-andremortemousque/Documents/Research/2014-15_Neel/Experimental/Ratatouille/Ratatouille32CD12f3'))
+from stab12_729_SequenceDict import Generate_SequenceInfo
 import numpy as np
 from libs.SionAWG_class import SionAWG
 from libs.miscellanii import Normalize_mdsequence
@@ -113,8 +114,8 @@ def FourGatesSequence(SequenceInfo):
     # Build SequenceElements (only distinct wfs)
     # Build Sequence (l * n * m * ... dimensions, only wf names)
     sequence['SequenceElements'], sequence['Sequence'] = Build_WFs_from_SequenceInfo(SequenceInfo)
-    sequence['NumberOfElements'] = len(sequence['SequenceElements'].keys()) 
-    
+    sequence['NumberOfElements'] = len(sequence['SequenceElements'].keys())
+
     # Set the Amplitude, Offset, Delay, Output of sequence['Channels']
     sequence, Vpp = Normalize_mdsequence(sequence)
     for channel in range(1,5):
@@ -134,8 +135,8 @@ if __name__ == '__main__':
 
     seqinf = Generate_SequenceInfo()
     spinmap = FourGatesSequence(seqinf)
-    sion.openCom()
-    sion.DeleteAllWaveforms()
+    # sion.openCom()
+    # sion.DeleteAllWaveforms()
     #sion.SendSequenceLight(sequence = spinmap)
-    sion.SendMultiDimensionnalSequenceLight(mdsequence = spinmap)
-    sion.closeCom()
+    # sion.SendMultiDimensionnalSequenceLight(mdsequence = spinmap)
+    # sion.closeCom()
