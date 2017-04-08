@@ -135,8 +135,8 @@ if __name__ == '__main__':
 
     seqinf = Generate_SequenceInfo()
     spinmap = FourGatesSequence(seqinf)
-    # sion.openCom()
-    # sion.DeleteAllWaveforms()
+    sion.openCom()
+    sion.DeleteAllWaveforms()
     #sion.SendSequenceLight(sequence = spinmap)
-    # sion.SendMultiDimensionnalSequenceLight(mdsequence = spinmap)
-    # sion.closeCom()
+    sion.SendMultiDimensionnalSequenceLight(mdsequence = spinmap)
+    sion.closeCom()
