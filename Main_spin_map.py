@@ -1,8 +1,8 @@
 # encoding: utf-8
 from __future__ import division
 import os, sys
-sys.path.append(os.path.abspath('C:\\DATA\\Ratatouille\\Ratatouille32CD12f2'))
-from stab12_705_SequenceDict import Generate_SequenceInfo
+sys.path.append(os.path.abspath('C:\\DATA\\Ratatouille\\Ratatouille32CD12f3'))
+from stab12_728_SequenceDict import Generate_SequenceInfo
 import numpy as np
 from libs.SionAWG_class import SionAWG
 from libs.miscellanii import Normalize_mdsequence
