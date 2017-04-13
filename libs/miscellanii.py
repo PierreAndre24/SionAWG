@@ -81,7 +81,7 @@ def _Build_WF_from_SequenceInfo(SequenceInfo, abc, channel, wfname):
                 v_next = P_next[channel][0]
             else:
                 v_next = P_next[channel][abc]
-            wf[i:i+di,:] = np.linspace(v, v_next, di)
+            wf[i:i+di,:] = np.reshape(np.linspace(v, v_next, di), (di,1))
 
     # return things
     return {\
