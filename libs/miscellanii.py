@@ -11,7 +11,7 @@ def Normalize_sequence(sequence):
                 Vpp[channel-1] = 2.*max(abs(sequence['SequenceElements'][i]['Channels'][channel]['Waveform']))
     for i in range(1,5):
         Vpp[i-1] = max(Vpp[i-1],0.02)
-
+    
 
     # Normalize the waveforms
     for i in sequence['SequenceElements'].keys():
@@ -32,10 +32,10 @@ def Normalize_mdsequence(sequence):
     for i in range(1,5):
         Vpp[i-1] = max(Vpp[i-1],0.02)
 
-
     # Normalize the waveforms
     for wfname in sequence['SequenceElements'].keys():
-            sequence['SequenceElements'][wfname]['Waveform'] = sequence['SequenceElements'][wfname]['Waveform']/(Vpp[channel-1]/2.0)
+        channel = sequence['SequenceElements'][wfname]['Channel']
+        sequence['SequenceElements'][wfname]['Waveform'] = sequence['SequenceElements'][wfname]['Waveform']/(Vpp[channel-1]/2.0)
 
     return sequence, Vpp
 
@@ -87,6 +87,7 @@ def _Build_WF_from_SequenceInfo(SequenceInfo, abc, channel, wfname):
     return {\
         'Name':wfname, \
         'Size': WaveformDuration,\
+        'Channel':channel,\
         'Waveform': wf, \
         'Marker_1':[], \
         'Marker_2':[]}
