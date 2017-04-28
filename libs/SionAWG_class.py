@@ -359,7 +359,151 @@ class SionAWG(AWGCom):
                         State=1, \
                         Index=seqelindex + 1)
 
+    def SendMultiDimensionnalSequenceLight_PrePost(self, mdsequence, resendstartindex = 0):
+        """
+        sequence is a dictionnary with those entries:
+            - 'NumberOfElements' = size of SequenceElement
+            - 'SequenceLength' = Number of waveforms played by the awg (no waiting)
+            - 'SequenceElements' = dictionnary of the SequenceElement
+            - 'Sequence' = dictionnary of the Sequence
+            - 'Channels' = 4 dictionnaries of 'Offset', 'Amplitude', 'Delay', 'Output'
+            - 'WaitingSequenceElement' = dict of 'Name', 'Size','Waveform', 'Marker_1', 'Marker_2'
+            used to wait for triggers.
 
+        PreSequenceElement and PostSequenceElement are dictionnaries with channel indexes (1, 2, 3, 4) as keys:
+            - i: = dictionnary of 'Name', 'Size','Waveform', 'Marker_1', 'Marker_2'
+
+        SequenceElement is a dictionnary with:
+            - 'Name' = dictionnary of 'Name', 'Size','Waveform', 'Marker_1', 'Marker_2'
+            Has to be the same definition as WaitingSequenceElement
+
+        Sequence is a dictionnary with:
+            - 'Index'
+            - 'Channels' = dictionnary of Name of the wf (should be present in SequenceElement)
+        """
+        # Open the communication
+
+
+        self.setRunMode("SEQuence")
+        self.createSequence(SequenceLength = mdsequence['SequenceLength'] * 4)
+
+        # Send commands for the offset, amplitude, delay, OUTPUT
+        for key in mdsequence['Channels'].keys(): #[1, 2, 3, 4]
+            channel = mdsequence['Channels'][key]
+            self.changeChannelOffset(Channel=key, Offset=channel['Offset'])
+            self.changeChannelAmplitude(Channel=key, Amplitude=channel['Amplitude'])
+            self.changeChannelDelay(Channel=key, Delay=channel['Delay'])
+            self.setChannelOutput(Channel=key, Output=channel['Output'])
+
+        # Transmit the WaitingSequenceElement, PreSequenceElement, PostSequenceElement mdsequence elements
+        if resendstartindex == 0:
+            # Wait element
+            self.newWaveform(\
+                name=mdsequence['WaitingSequenceElement']['Name'], \
+                size=mdsequence['WaitingSequenceElement']['Size'])
+            self.transmitWaveformData(\
+                name=mdsequence['WaitingSequenceElement']['Name'], \
+                data=mdsequence['WaitingSequenceElement']['Waveform'], \
+                marker1=mdsequence['WaitingSequenceElement']['Marker_1'], \
+                marker2=mdsequence['WaitingSequenceElement']['Marker_2'])
+            # PreSequence element
+            for channel in mdsequence['PreSequenceElement'].keys():
+                self.newWaveform(\
+                    name=mdsequence['PreSequenceElement'][channel]['Name'], \
+                    size=mdsequence['PreSequenceElement'][channel]['Size'])
+                self.transmitWaveformData(\
+                    name=mdsequence['PreSequenceElement'][channel]['Name'], \
+                    data=mdsequence['PreSequenceElement'][channel]['Waveform'], \
+                    marker1=mdsequence['PreSequenceElement'][channel]['Marker_1'], \
+                    marker2=mdsequence['PreSequenceElement'][channel]['Marker_2'])
+            # PostSequence element
+            for channel in mdsequence['PostSequenceElement'].keys():
+                self.newWaveform(\
+                    name=mdsequence['PostSequenceElement'][channel]['Name'], \
+                    size=mdsequence['PostSequenceElement'][channel]['Size'])
+                self.transmitWaveformData(\
+                    name=mdsequence['PostSequenceElement'][channel]['Name'], \
+                    data=mdsequence['PostSequenceElement'][channel]['Waveform'], \
+                    marker1=mdsequence['PostSequenceElement'][channel]['Marker_1'], \
+                    marker2=mdsequence['PostSequenceElement'][channel]['Marker_2'])
+
+        # Transmit all the mdsequence elements
+        if resendstartindex == 0:
+            for seqel in mdsequence['SequenceElements'].values(): #seqel is abbreviation for SequenceElement
+                wfname = seqel['Name']
+                self.newWaveform(\
+                    name=wfname, \
+                    size=seqel['Size'])
+                self.transmitWaveformData(\
+                    name=wfname, \
+                    data=seqel['Waveform'], \
+                    marker1=seqel['Marker_1'], \
+                    marker2=seqel['Marker_2'])
+
+        # Send all the mdsequence elements
+        for seqel in mdsequence['Sequence'].values(): #seqel is abbreviation for SequenceElement
+            # waitindex = seqel['Index'] * 3 - 2
+            # preindex = waitindex + 1
+            # seqelindex = preindex + 1
+            waitindex = seqel['Index'] * 4 - 3
+            preindex = waitindex + 1
+            seqelindex = preindex + 1
+            postindex = seqelindex + 1
+            if  waitindex >= resendstartindex:
+                # Wait for trigger
+                for channel in range(1,5):
+                    self.setChannelWaveformSequence(\
+                        Channel=channel, \
+                        WaveformName=mdsequence['WaitingSequenceElement']['Name'], \
+                        SequenceIndex=waitindex)
+                self.setSeqElementJump(\
+                    SequenceIndex=waitindex, \
+                    Index=preindex)
+                self.setSeqElementLooping(\
+                    SequenceIndex=waitindex,\
+                    Repeat=1,\
+                    InfiniteLoop=1)
+
+                # PreSequenceElement
+                for channel in range(1,5):
+                    self.setChannelWaveformSequence(\
+                        Channel=channel, \
+                        WaveformName=mdsequence['PreSequenceElement'][channel]['Name'], \
+                        SequenceIndex=preindex)
+                self.setSeqElementGoto(\
+                    SequenceIndex=preindex, \
+                    State=1, \
+                    Index=seqelindex)
+
+                # Set up all four channels
+                for key in seqel['Channels'].keys(): #seqelch stands for mdsequence element channel
+                    # the key = channel
+                    wfname = seqel['Channels'][key]
+                    self.setChannelWaveformSequence(\
+                        Channel=key, \
+                        WaveformName=wfname, \
+                        SequenceIndex=seqelindex)
+                self.setSeqElementGoto(\
+                    SequenceIndex=seqelindex, \
+                    State=1, \
+                    Index=postindex)
+
+                # PostSequenceElement
+                for channel in range(1,5):
+                    self.setChannelWaveformSequence(\
+                        Channel=channel, \
+                        WaveformName=mdsequence['PostSequenceElement'][channel]['Name'], \
+                        SequenceIndex=postindex)
+                if postindex == 4 * mdsequence['SequenceLength']:# Back to 1st element
+                    self.setSeqElementGoto(\
+                        SequenceIndex=postindex, \
+                        State=1, \
+                        Index=1)
+                else:
+                    self.setSeqElementGoto(\
+                        SequenceIndex=postindex, \
+                        State=1, \
+                        Index=postindex + 1)
 
     def SendSingleWFLight(self, wf):
         """

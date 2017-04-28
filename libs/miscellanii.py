@@ -34,25 +34,19 @@ def Normalize_mdsequence(sequence):
     for i in range(1,5):
         Vpp[i-1] = max(Vpp[i-1],0.02)
 
-    if 'PreSequence' in sequence.keys():
+    if 'PreSequenceElement' in sequence.keys():
         # Find the maximum amplitude for the PreSequence
         VppPre = np.zeros((4,1))
-        for i in sequence['PreSequence'].keys():
-            for channel in sequence['PreSequence'][i]['Channels'].keys():
-                wfname = sequence['PreSequence'][i]['Channels'][channel]
-                if 2.*max(abs(sequence['SequenceElements'][wfname]['Waveform'])) > Vpp[channel-1]:
-                    VppPre[channel-1] = 2.*max(abs(sequence['SequenceElements'][wfname]['Waveform']))
+        for channel in sequence['PreSequenceElement'].keys():
+            VppPre[channel-1] = 2.*max(abs(sequence['PreSequenceElement'][channel]['Waveform']))
         for i in range(1,5):
             Vpp[i-1] = max(VppPre[i-1], Vpp[i-1])
 
-    if 'PostSequence' in sequence.keys():
+    if 'PostSequenceElement' in sequence.keys():
         # Find the maximum amplitude for the PreSequence
         VppPost = np.zeros((4,1))
-        for i in sequence['PostSequence'].keys():
-            for channel in sequence['PostSequence'][i]['Channels'].keys():
-                wfname = sequence['PostSequence'][i]['Channels'][channel]
-                if 2.*max(abs(sequence['SequenceElements'][wfname]['Waveform'])) > Vpp[channel-1]:
-                    VppPre[channel-1] = 2.*max(abs(sequence['SequenceElements'][wfname]['Waveform']))
+        for channel in sequence['PostSequenceElement'].keys():
+            VppPost[channel-1] = 2.*max(abs(sequence['PostSequenceElement'][channel]['Waveform']))
         for i in range(1,5):
             Vpp[i-1] = max(VppPost[i-1], Vpp[i-1])
 
@@ -61,6 +55,11 @@ def Normalize_mdsequence(sequence):
     for wfname in sequence['SequenceElements'].keys():
         channel = sequence['SequenceElements'][wfname]['Channel']
         sequence['SequenceElements'][wfname]['Waveform'] = sequence['SequenceElements'][wfname]['Waveform']/(Vpp[channel-1]/2.0)
+    for i in range(1,5):
+        if 'PreSequenceElement' in sequence.keys():
+            sequence['PreSequenceElement'][i]['Waveform'] = sequence['PreSequenceElement'][i]['Waveform']/(Vpp[channel-1]/2.0)
+        if 'PostSequenceElement' in sequence.keys():
+            sequence['PostSequenceElement'][i]['Waveform'] = sequence['PostSequenceElement'][i]['Waveform']/(Vpp[channel-1]/2.0)
 
     return sequence, Vpp
 
@@ -261,3 +260,85 @@ def Build_WFs_from_SequenceInfo_Pre(PreSequenceInfo, SequenceInfo):
 
     # return things
     return PreSequenceElement, SequenceElements, Sequence
+
+def Build_WFs_from_SequenceInfo_PrePost(PreSequenceInfo, SequenceInfo, PostSequenceInfo):
+    # Init SequenceElements, Sequence
+    Sequence = {}
+    SequenceLength = np.prod(np.array(SequenceInfo['Dimensions'])) # How many different waveforms (except waits)
+    for i in np.arange(SequenceLength):
+        i += 1 #From numpy numbering to AWG
+        Sequence[i] = {'Index':i, 'Channels':{1:'', 2:'', 3:'', 3:''}}
+    PreSequenceElement = {1:'', 2:'', 3:'', 3:''}
+    PostSequenceElement = {1:'', 2:'', 3:'', 3:''}
+    SequenceElements = {}
+
+    ################################################################################
+    # Sequence
+    # Loop over all Channels
+    for channel in range(1,5):
+        # Check if at least one parameters is stepped
+        BOOL_ConstantPulse = True
+        for P in SequenceInfo['Elements'].values():
+            # Constant pulse
+            if (P[channel].shape == (1,)) and (P['Duration'].shape == (1,)):
+                BOOL_ConstantPulse = BOOL_ConstantPulse and True
+            else:
+                BOOL_ConstantPulse = BOOL_ConstantPulse and False
+
+        if BOOL_ConstantPulse:
+            # Define Constant pulse in SequenceElements
+            wfname = 'C'+str(channel)
+            index = tuple([0 for i in SequenceInfo['Dimensions']])
+            SequenceElements[wfname] = _Build_WF_from_SequenceInfo(SequenceInfo, index, channel, wfname)
+
+            # Fill up Sequence
+            for seqi in Sequence.values():
+                seqi['Channels'][channel] = wfname
+
+        else:
+            # Multidimensionnal pulse
+            # Check what are the dimensions stepped
+
+            pulse_dimensions = [1 for i in SequenceInfo['Dimensions']]
+            for P in SequenceInfo['Elements'].values():
+                pulse_dimensions = _update_pulse_dimensions(P[channel].shape, pulse_dimensions)
+                pulse_dimensions = _update_pulse_dimensions(P['Duration'].shape, pulse_dimensions)
+
+            # Define pulses in SequenceElements
+            n_pulses = np.prod(pulse_dimensions)
+            for i in np.arange(n_pulses):
+                index = np.unravel_index(i, pulse_dimensions)
+                wfname = 'C'+str(channel)
+                for j, (d, pulse_dim_j) in enumerate(zip(index, pulse_dimensions)):
+                    if pulse_dim_j > 1:
+                        wfname = wfname + ascii_lowercase[j] + str(d)
+                SequenceElements[wfname] = _Build_WF_from_SequenceInfo(SequenceInfo, index, channel, wfname)
+
+            # Fill up Sequence
+            for i in np.arange(SequenceLength):
+                index = np.unravel_index(i, SequenceInfo['Dimensions'])
+                i += 1 #Python to AWG
+                wfname = 'C'+str(channel)
+                for j, (d, pulse_dim_j) in enumerate(zip(index, pulse_dimensions)):
+                    if pulse_dim_j > 1:
+                        wfname = wfname + ascii_lowercase[j] + str(d)
+                Sequence[i]['Channels'][channel] = wfname
+
+    ################################################################################
+    # PreSequence
+    for channel in range(1,5):
+        # Define Constant pulse in SequenceElements
+        wfname = 'C'+str(channel)+'Pre'
+        index = tuple([0 for i in SequenceInfo['Dimensions']])
+        PreSequenceElement[channel] = _Build_WF_from_SequenceInfo(PreSequenceInfo, index, channel, wfname)
+
+    ################################################################################
+    # PostSequence
+    for channel in range(1,5):
+        # Define Constant pulse in SequenceElements
+        wfname = 'C'+str(channel)+'Post'
+        index = tuple([0 for i in SequenceInfo['Dimensions']])
+        PostSequenceElement[channel] = _Build_WF_from_SequenceInfo(PostSequenceInfo, index, channel, wfname)
+
+    # return things
+    return PreSequenceElement, SequenceElements, PostSequenceElement, Sequence
