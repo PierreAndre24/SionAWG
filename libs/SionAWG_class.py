@@ -47,15 +47,23 @@ class SionAWG(AWGCom):
         self.C3.Send_Properties_Light()
         self.C4.Send_Properties_Light()
 
-    def DeleteAllWaveforms(self):
+    def DeleteAllWaveforms(self, exceptions = []):
         """
         Delete all waveforms present.
         """
 
         wfnames = self.readWaveformNames()
-        for wfname in wfnames:
-            if wfname[0] != '*':
-                self.deleteWaveforms(wfname)
+        if exceptions == []:
+            for wfname in wfnames:
+                if wfname[0] != '*':
+                    self.deleteWaveforms(wfname)
+        else:
+            for wfname in wfnames:
+                if wfname not in exceptions:
+                    if wfname[0] != '*':
+                        self.deleteWaveforms(wfname)
+
+
 
 
     def SendSequenceLight(self, sequence):
@@ -143,7 +151,7 @@ class SionAWG(AWGCom):
                     State=1, \
                     Index=seqelindex + 1)
 
-    def SendMultiDimensionnalSequenceLight(self, mdsequence, resendstartindex = 0):
+    def SendMultiDimensionnalSequenceLight(self, mdsequence, resendstartindex = 0, send_Wait = True):
         """
         sequence is a dictionnary with those entries:
             - 'NumberOfElements' = size of SequenceElement
@@ -205,19 +213,20 @@ class SionAWG(AWGCom):
             waitindex = seqel['Index'] * 2 - 1
             seqelindex = waitindex + 1
             if  waitindex >= resendstartindex:
+                if send_Wait:
                 # Wait for trigger
-                for channel in range(1,5):
-                    self.setChannelWaveformSequence(\
-                        Channel=channel, \
-                        WaveformName=mdsequence['WaitingSequenceElement']['Name'], \
-                        SequenceIndex=waitindex)
-                self.setSeqElementJump(\
-                    SequenceIndex=waitindex, \
-                    Index=seqelindex)
-                self.setSeqElementLooping(\
-                    SequenceIndex=waitindex,\
-                    Repeat=1,\
-                    InfiniteLoop=1)
+                    for channel in range(1,5):
+                        self.setChannelWaveformSequence(\
+                            Channel=channel, \
+                            WaveformName=mdsequence['WaitingSequenceElement']['Name'], \
+                            SequenceIndex=waitindex)
+                    self.setSeqElementJump(\
+                        SequenceIndex=waitindex, \
+                        Index=seqelindex)
+                    self.setSeqElementLooping(\
+                        SequenceIndex=waitindex,\
+                        Repeat=1,\
+                        InfiniteLoop=1)
 
                 # Set up all four channels
                 for key in seqel['Channels'].keys(): #seqelch stands for mdsequence element channel
