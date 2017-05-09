@@ -3,7 +3,7 @@ from __future__ import division
 import os, sys
 sys.path.append(os.path.abspath('C:\\DATA\\Ratatouille\\Ratatouille32CD12f6'))
 # sys.path.append(os.path.abspath('/Users/pierre-andremortemousque/Documents/Research/2014-15_Neel/Experimental/Ratatouille/Ratatouille32CD12f3'))
-from stab12_1229_SequenceDict import Generate_SequenceInfo
+from stab12_1292_SequenceDict import Generate_SequenceInfo
 import numpy as np
 from libs.SionAWG_class import SionAWG
 from libs.miscellanii import Normalize_mdsequence
@@ -251,8 +251,8 @@ if __name__ == '__main__':
     ##sion.SendSequenceLight(sequence = spinmap)
     # sion.DeleteAllWaveforms()
     # sion.DeleteAllWaveforms(exceptions = ['Wait'])
-    # sion.SendMultiDimensionnalSequenceLight(mdsequence = spinmap, resendstartindex = 0, send_Wait = False)
-    # sion.SendMultiDimensionnalSequenceLight(mdsequence = spinmap, resendstartindex = 7240)
+    # sion.SendMultiDimensionnalSequenceLight(mdsequence = spinmap, resendstartindex = 0, send_Wait = True)
+    # sion.SendMultiDimensionnalSequenceLight(mdsequence = spinmap, resendstartindex = 7374)
     # sion.SendMultiDimensionnalSequenceLight_PrePost(mdsequence = spinmap, resendstartindex = 0)
-    sion.SendMultiDimensionnalSequenceLight_PrePost(mdsequence = spinmap, resendstartindex = 5135)
+    sion.SendMultiDimensionnalSequenceLight_PrePost(mdsequence = spinmap, resendstartindex = 1493)
     sion.closeCom()
